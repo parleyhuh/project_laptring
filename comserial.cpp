@@ -4,9 +4,6 @@ comserial::comserial(QSerialPort *myDev)
 {
     devSerial = myDev;
 }
-
-
-
 QStringList comserial::ConnectedDevices(){
     QStringList devs;
 
