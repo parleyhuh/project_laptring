@@ -9,38 +9,29 @@ Dialog::Dialog(QWidget *parent) :
     ui->setupUi(this);
     serial = new QSerialPort(this);
     secprocSerial = new comserial(serial);
+    timer2 = new QTimer(this);
+    connect(timer2,SIGNAL(timeout()),this,SLOT(myfunction()));
 
-    timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(myfunction()));
+
     giay = 0;
-
-
+    timer = new QTimer(this);
     timer->setInterval(1000);
     connect (timer, SIGNAL(timeout()), this, SLOT(timerr()));
     connect (timer, SIGNAL(timeout()), this, SLOT(prgbar()));
-//    timer->start();
+    timer->start();
+    timer2->start();
     ui->spinBox->setMinimum(0);
+
+    ui->groupBox_waterpump->hide();
+    ui->groupBox_LED->hide();
 
     }
 
 void Dialog::timerr()
     {
     int a=ui->spinBox->value();
-    //    int b=ui->spinBox_2->value();
-    //    int c=ui->spinBox_3->value();
-    giay = giay + 1;
-//    if (giay == 60)
-//    {
-//        giay = 0;
-//        phut = phut + 1;
-//        if(phut==60)
-//        {
-//            phut = 0;
-//            giay = 0;
-//            gio = gio + 1;
-//        }
-//    }
-    if(/*(giay==(a+1) && phut==b) && gio==c*/ giay/*+phut*60+gio*60*60*/==a+1)
+
+    if(giay==a+1)
     {
         timer->stop();
         QMessageBox::information(this,"Thông báo","Đã hết thời gian");
@@ -48,12 +39,8 @@ void Dialog::timerr()
     else
     {
         ui->lcdNumber->display(giay);
-//        ui->lcdNumber_2->display(phut);
-//        ui->lcdNumber_3->display(gio);
-        //        qDebug()<<giay;
-        //        qDebug()<<phut;
-        //        qDebug()<<gio;
     }
+    giay = giay + 1;
     }
 
 
@@ -61,12 +48,9 @@ void Dialog::timerr()
 void Dialog::on_pushButton_reset_clicked()          //RESET
 {
     giay=0;
-
     ui->lcdNumber->display(0);
-
     ui->progressBar->setValue(0);
     ui->spinBox->setValue(0);
-
     //    ui->label->setText(QString::number(giay)+"%");
     timer->stop();
     //    qApp->processEvents();
@@ -113,25 +97,22 @@ Dialog::~Dialog()
 }
 
 void Dialog::myfunction()
-
 {
     QTime time_text = QTime::currentTime();
-    ui->label_time->setText(time_text.toString());
+    ui->label_time->setText(time_text.toString("hh : mm : ss"));
 }
 
 void Dialog::on_red_slider_valueChanged(int value)
 {
-    ui->red_label->setText(QString("<span style=\" font-size:15pt; font-weight:600;\">%1</span>").arg(value));
-    Dialog::updateRGB(QString("r%1").arg(value));
-    ui->textEdit->setText(QString::number(value));
+    ui->red_label->setText(QString("<span style=\" font-weight:700; color:#f50105;\">%1</span>").arg(value));
+    Dialog::updateRGB(QString("r%1").arg(value));    
     qDebug() << value;
 }
 
 void Dialog::on_blue_slider_valueChanged(int value)
 {
-    ui->blue_label->setText(QString("<span style=\" font-size:15pt; font-weight:600;\">%1</span>").arg(value));
+    ui->blue_label->setText(QString("<span style=\" font-weight:700; color:#0000ff;\">%1</span>").arg(value));
     Dialog::updateRGB(QString("b%1").arg(value));
-    ui->textEdit->setText(QString::number(value));
     qDebug() << value;
 }
 
@@ -146,8 +127,47 @@ void Dialog::updateRGB(QString command)
 
 void Dialog::write(char n){
 
+}
 
+void Dialog::on_radioButton_4_clicked()
+{
+    ui->groupBox_LED->hide();
+    ui->groupBox_waterpump->show();
+}
+
+
+void Dialog::on_radioButton_5_clicked()
+{
+    ui->groupBox_waterpump->hide();
+    ui->groupBox_LED->show();
+}
+
+
+void Dialog::on_radioButton_6_clicked()
+{
+    ui->groupBox_waterpump->hide();
+    ui->groupBox_LED->hide();
+}
+
+void Dialog::on_pushButton_exit_clicked()
+{
+    QMessageBox::StandardButton reply = QMessageBox::question (this,"Thông báo","Bạn có muốn thoát không?", QMessageBox::Yes|QMessageBox::No);
+    if(reply == QMessageBox::Yes){
+        qApp->closeAllWindows();
+    }
+    else{
+        return;
+    }
 
 }
 
+
+void Dialog::on_pushButton_clicked()
+{
+    int a= ui->red_slider->value();
+    int b= ui->blue_slider->value();
+    Dialog::updateRGB(QString("r%1").arg(a));
+    Dialog::updateRGB(QString("b%1").arg(b));
+    ui->textEdit->setText(QString("Màu sắc hiển thị:\nĐỏ: %1\nXanh dương: %2").arg(a).arg(b));
+}
 
