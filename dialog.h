@@ -47,7 +47,7 @@ private:
 
     QSerialPort *serial;
     comserial *secprocSerial;
-    QTimer *timer;
+    QTimer *timer,*timer2;
     short int giay;
 
 };
